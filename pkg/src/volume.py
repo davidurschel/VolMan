@@ -4,7 +4,7 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
 import numpy as np
 
 
-def PercentageToDB(percentage:float, minV:float=-60.0, maxV:float=0.0) -> float:
+def percentage_to_db(percentage:float, minV:float=-60.0, maxV:float=0.0) -> float:
     percentage=max(min(percentage, 100.0), 0.0)
     if percentage == 0.0:
         return minV
@@ -12,15 +12,15 @@ def PercentageToDB(percentage:float, minV:float=-60.0, maxV:float=0.0) -> float:
     return max(min(res, maxV), minV)
 
 
-def SetSystemVolume(percentage:float):
+def set_system_volume(percentage:float):
     devices = AudioUtilities.GetSpeakers()
     interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
     volume = cast(interface, POINTER(IAudioEndpointVolume))
-    volume.SetMasterVolumeLevel(PercentageToDB(percentage), None)
+    volume.SetMasterVolumeLevel(percentage_to_db(percentage), None)
     return
 
 
-def SetApplicationVolume(percentage:float, application:str):
+def set_app_volume(percentage:float, application:str):
     sessions = AudioUtilities.GetAllSessions()
     percentage = max(min(percentage, 100.0), 0.0)
     for session in sessions:
@@ -31,13 +31,13 @@ def SetApplicationVolume(percentage:float, application:str):
 
 
 """Takes a set of all applications and the volume percentage to which they should be set"""
-def SetApplicationVolumes(applications:{str, float}):
+def set_app_volumes(applications:{str, float}):
     sessions = AudioUtilities.GetAllSessions()
     for session in sessions:
         if session.Process == None:
             continue
         volume = session._ctl.QueryInterface(ISimpleAudioVolume)
-        processName = session.Process.name()
+        processName = session.Process.name().lower()
         if processName in applications:
             percentage = applications[processName]
             percentage = max(min(percentage, 100.0), 0.0)
@@ -46,7 +46,7 @@ def SetApplicationVolumes(applications:{str, float}):
 
 
 """Returns all the names of the applications for all processes that are currently visible under the volume mixer tab"""
-def GetActiveVolumeSessions() -> list:
+def get_active_volume_sessions() -> list:
     res = []
     sessions = AudioUtilities.GetAllSessions()
     for session in sessions:

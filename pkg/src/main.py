@@ -1,13 +1,11 @@
 from volume import SetSystemVolume, SetApplicationVolume, SetApplicationVolumes, GetActiveVolumeSessions
 import serial
-
-
-COM_PORT = 'COM4'
-BAUD_RATE = 9600 
-
+from load_config import load_config
 
 def main():
-    ser = serial.Serial(COM_PORT, BAUD_RATE)
+    com_port, baud_rate, applications = load_config()
+
+    ser = serial.Serial(com_port, baud_rate)
 
     while True:
         # Catch errors if the Serial bitstream is misalligned
