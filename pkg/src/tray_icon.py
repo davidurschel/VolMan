@@ -3,7 +3,7 @@ from PIL import Image
 from threading import Event
 import webbrowser
 
-ICON_PATH = 'assets/icon.png'
+ICON_PATH = 'assets/icon.ico'
 HELP_URL = 'https://github.com/davidurschel/VolMan'
 tray_icon_quit_event = Event()
 
