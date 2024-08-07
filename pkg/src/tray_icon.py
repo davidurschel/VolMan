@@ -2,10 +2,17 @@ import pystray
 from PIL import Image
 from threading import Event
 import webbrowser
+import sys
+import os
 
-ICON_PATH = 'assets/icon.ico'
+ICON_FILE = 'icon.ico'
 HELP_URL = 'https://github.com/davidurschel/VolMan'
 tray_icon_quit_event = Event()
+
+def get_asset_path(filename):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, 'assets', filename)
+    return os.path.join('assets', filename)
 
 def on_quit(icon):
     icon.stop()
@@ -25,7 +32,7 @@ def start_tray_icon():
     )
     
     icon = pystray.Icon(name="vol_man_volume_manager", 
-                        icon=Image.open(ICON_PATH), 
+                        icon=Image.open(get_asset_path(ICON_FILE)), 
                         title="VolMan", 
                         menu=menu)
     icon.visible = False
