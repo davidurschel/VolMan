@@ -4,6 +4,7 @@ from load_config import load_config
 from threading import Thread
 from tray_icon import start_tray_icon, tray_icon_quit_event
 
+
 def main():
     com_port, baud_rate, applications = load_config()
     ser = serial.Serial(com_port, baud_rate)
