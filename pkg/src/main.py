@@ -1,7 +1,6 @@
 from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 import serial
 from config_functions import load_config
-from threading import Thread
 from tray_icon import start_tray_icon, tray_icon_quit_event, serial_unavailable_event
 from config_ui import reload_configs_event
 from tkinter import messagebox
@@ -25,9 +24,7 @@ def main():
     com_port, baud_rate, applications = load_config()
     ser = open_serial(com_port, baud_rate)
 
-    # Run system tray in a separate thread
-    tray_thread = Thread(target=start_tray_icon, daemon=True)
-    tray_thread.start()
+    start_tray_icon()
 
     while not tray_icon_quit_event.is_set():
         if reload_configs_event.is_set():
