@@ -1,30 +1,29 @@
 import threading
+import comtypes
 import time
 import serial
-import pythoncom
 from tkinter import messagebox
 from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 from config_functions import load_config
 from tray_icon import start_tray_icon, tray_icon_quit_event, serial_unavailable_event
 from config_ui import reload_configs_event
 
-def open_serial(com_port, baud_rate):
-    ser = None
-
-    try:
-        ser = serial.Serial(com_port, baud_rate)
-        serial_unavailable_event.clear()
-    except Exception as e:
-        print(e)
-        serial_unavailable_event.set()
-        messagebox.showerror("VolMan: COM Port Issue",
-                f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
-    
-    return ser
 
 def background_process():
-    pythoncom.CoInitialize()  # Initialize COM library for this thread
+    comtypes.CoInitialize()
 
+    def open_serial(com_port, baud_rate):
+        ser = None
+        try:
+            ser = serial.Serial(com_port, baud_rate)
+            serial_unavailable_event.clear()
+        except Exception as e:
+            print(e)
+            serial_unavailable_event.set ()
+            messagebox.showerror("VolMan: COM Port Issue",
+                f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
+        return ser
+    
     com_port, baud_rate, applications = load_config()
     ser = open_serial(com_port, baud_rate)
 
@@ -47,7 +46,7 @@ def background_process():
             data = ser.readline().decode().strip()
             rails = data.split('|')
 
-            app_volumes = match_rails_to_apps(rails, applications)
+            app_volumes = match_rails_to_apps(rails, applications)  
             if "MASTER" in app_volumes:
                 set_system_volume(app_volumes["MASTER"])
 
@@ -60,7 +59,7 @@ def background_process():
             print('An error occurred:', e)
 
     ser.close()
-    pythoncom.CoUninitialize()  # Uninitialize COM library for this thread when done
+    comtypes.CoUninitialize()
 
 def main():
     # Start the background process in a separate thread
