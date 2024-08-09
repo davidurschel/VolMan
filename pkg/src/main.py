@@ -12,16 +12,17 @@ from config_ui import reload_configs_event
 def background_process():
     comtypes.CoInitialize()
 
-    def open_serial(com_port, baud_rate):
+    def open_serial(com_port, baud_rate, suppress_alert=False):
         ser = None
         try:
             ser = serial.Serial(com_port, baud_rate)
             serial_unavailable_event.clear()
         except Exception as e:
             print(e)
-            serial_unavailable_event.set ()
-            messagebox.showerror("VolMan: COM Port Issue",
-                f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
+            serial_unavailable_event.set()
+            if not suppress_alert:
+                messagebox.showerror("VolMan: COM Port Issue",
+                    f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
         return ser
     
     com_port, baud_rate, applications = load_config()
@@ -39,6 +40,7 @@ def background_process():
 
         if serial_unavailable_event.is_set():
             time.sleep(1)
+            ser = open_serial(com_port, baud_rate, suppress_alert=True)
             continue
 
         # Catch errors if the Serial bitstream is misaligned
