@@ -7,7 +7,7 @@ import constants
 from config_ui import ConfigWindow
 
 tray_icon_quit_event = Event()
-reload_configs_event = Event()
+serial_unavailable_event = Event()
 
 def on_config():
     config_ui = ConfigWindow()

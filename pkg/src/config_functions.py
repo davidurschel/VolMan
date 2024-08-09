@@ -12,9 +12,14 @@ def save_config(com_port, baud_rate, rails, config_path='config.cfg'):
 '''Returns: com_port:str, baud_rate:str, rails:dict'''
 def load_config(config_path='config.cfg') -> tuple:
     if not os.path.isfile(config_path):
-        save_config("COM7", "9600", {})
-    with open(config_path, 'r') as f:
-        config_dict = json.load(f)
+        save_config("", "", {})
+    config_dict = {'COM_PORT': '', 'BAUD_RATE': '', 'RAILS':''}
+    try:
+        with open(config_path, 'r') as f:
+            config_dict = json.load(f)
+    except: 
+        pass
+
     try:
         com_port = config_dict['COM_PORT']
     except:

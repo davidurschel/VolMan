@@ -121,10 +121,7 @@ class ConfigWindow(tk.Tk):
         self.load_saved_button.grid(row=0, column=0, padx=5, sticky="ew")
 
         self.save_button = ttk.Button(self.button_frame, text="Save and Apply", command=self.save_cfg)
-        self.save_button.grid(row=0, column=1, padx=5, sticky="ew")
-
-        self.save_apply_button = ttk.Button(self.button_frame, text="Save, Apply, and Close", command=self.save_and_exit)
-        self.save_apply_button.grid(row=0, column=2, padx=5, sticky="ew")
+        self.save_button.grid(row=0, column=2, padx=5, sticky="ew")
 
         self.init_cfg()
 
@@ -168,12 +165,6 @@ class ConfigWindow(tk.Tk):
 
         save_config(com_port, baud_rate, rails)
         reload_configs_event.set()
-
-        
-
-    def save_and_exit(self):
-        self.save_cfg()
-        self.destroy()
 
 
 if __name__ == "__main__":
