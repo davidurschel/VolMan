@@ -1,23 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 from tools import get_asset_path
-from constants import ICON_FILE
+from constants import ICON_FILE, BAUD_RATES
+from config_functions import load_config, save_config
+from threading import Event
+
+reload_configs_event = Event()
 
 class RailTab(ttk.Frame):
-    def __init__(self, parent, rail_id):
+    def __init__(self, parent, rail_id, initial_list=None):
         super().__init__(parent)
         self.rail_id = rail_id
 
-        # Main layout
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Listbox
         self.listbox = tk.Listbox(self.main_frame, selectmode=tk.SINGLE)
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        # Buttons
         self.button_frame = ttk.Frame(self.main_frame)
         self.button_frame.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -33,7 +33,6 @@ class RailTab(ttk.Frame):
         self.others_button = ttk.Button(self.button_frame, text="Add Other", command=lambda: self.add_to_list("OTHER"))
         self.others_button.pack(fill=tk.X)
 
-        # Text Input and Add Button
         self.input_frame = ttk.Frame(self)
         self.input_frame.pack(fill=tk.X, padx=10, pady=5)
 
@@ -43,11 +42,13 @@ class RailTab(ttk.Frame):
         self.add_button = ttk.Button(self.input_frame, text="Add Application", command=self.add_from_input)
         self.add_button.pack(side=tk.RIGHT)
 
-        # Adjust the input box width
         self.update_input_width()
 
+        if initial_list:
+            for li in initial_list:
+                self.add_to_list(li)
+
     def update_input_width(self):
-        # Adjust the width of the input box to match the width of the listbox
         self.input_box.config(width=self.listbox.winfo_width() // 10)
 
     def remove_selected(self):
@@ -71,17 +72,14 @@ class RailTab(ttk.Frame):
 class ConfigWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.num_rails = 0
+        self.num_tabs = 0
         self.title("VolMan Configuration")
 
-        # Set window icon
         self.iconbitmap(get_asset_path(ICON_FILE))
         
-        # Create a vertical frame for COM port, BAUD rate, and active rails
         self.top_frame = ttk.Frame(self)
         self.top_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        # COM Port and BAUD Rate setup
         self.com_port_label = ttk.Label(self.top_frame, text="COM Port")
         self.com_port_label.grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
 
@@ -91,18 +89,16 @@ class ConfigWindow(tk.Tk):
         self.baud_rate_label = ttk.Label(self.top_frame, text="BAUD Rate")
         self.baud_rate_label.grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
 
-        baud_rates = ["300", "1200", "2400", "4800", "9600", "14400", "19200", "38400", "57600", "115200"]
-        self.baud_rate_dropdown = ttk.Combobox(self.top_frame, values=baud_rates)
+        self.baud_rate_dropdown = ttk.Combobox(self.top_frame, values=BAUD_RATES)
         self.baud_rate_dropdown.grid(row=1, column=1, padx=5, pady=5, sticky=tk.EW)
 
-        # Active Rails setup
         self.rail_count_frame = ttk.Frame(self.top_frame)
         self.rail_count_frame.grid(row=2, column=0, columnspan=2, pady=5, sticky=tk.EW)
 
         self.rail_count_label = ttk.Label(self.rail_count_frame, text="Active Rails:")
         self.rail_count_label.pack(side=tk.LEFT, padx=5)
 
-        self.rail_count_display = ttk.Label(self.rail_count_frame, text=str(self.num_rails))
+        self.rail_count_display = ttk.Label(self.rail_count_frame, text=str(self.num_tabs))
         self.rail_count_display.pack(side=tk.LEFT, padx=5)
 
         self.add_rail_button = ttk.Button(self.rail_count_frame, text="Add Rail", command=self.add_tab)
@@ -111,15 +107,12 @@ class ConfigWindow(tk.Tk):
         self.remove_rail_button = ttk.Button(self.rail_count_frame, text="Remove Rail", command=self.remove_tab)
         self.remove_rail_button.pack(side=tk.RIGHT, padx=5)
 
-        # Tabs
         self.tabs = ttk.Notebook(self)
         self.tabs.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
-        # Buttons for saving
         self.button_frame = ttk.Frame(self)
         self.button_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=5)
 
-        # Configure grid columns
         self.button_frame.grid_columnconfigure(0, weight=1)
         self.button_frame.grid_columnconfigure(1, weight=1)
         self.button_frame.grid_columnconfigure(2, weight=1)
@@ -127,41 +120,59 @@ class ConfigWindow(tk.Tk):
         self.load_saved_button = ttk.Button(self.button_frame, text="Load Save", command=self.load_saved_config)
         self.load_saved_button.grid(row=0, column=0, padx=5, sticky="ew")
 
-        self.save_button = ttk.Button(self.button_frame, text="Save and Apply", command=self.save_config)
+        self.save_button = ttk.Button(self.button_frame, text="Save and Apply", command=self.save_cfg)
         self.save_button.grid(row=0, column=1, padx=5, sticky="ew")
 
         self.save_apply_button = ttk.Button(self.button_frame, text="Save, Apply, and Close", command=self.save_and_exit)
         self.save_apply_button.grid(row=0, column=2, padx=5, sticky="ew")
 
-        self.init_tabs()
+        self.init_cfg()
 
-    def add_tab(self):
-        rail_tab = RailTab(self.tabs, self.num_rails)
-        self.tabs.add(rail_tab, text=f'Rail {self.num_rails + 1}')
-        self.num_rails += 1
-        self.rail_count_display.config(text=str(self.num_rails))
+    def add_tab(self, initial_list=[]):
+        rail_tab = RailTab(self.tabs, self.num_tabs, initial_list)
+        self.tabs.add(rail_tab, text=f'Rail {self.num_tabs + 1}')
+        self.num_tabs += 1
+        self.rail_count_display.config(text=str(self.num_tabs))
 
-    def init_tabs(self):
-        # Initialize tabs with default colors
-        for _ in range(4):  # As we have default colors, we use a fixed number of tabs here
-            self.add_tab()
+    def init_cfg(self):
+        com_port, baud_rate, rails = load_config()
+        self.com_port_dropdown.set(com_port)
+        self.baud_rate_dropdown.set(baud_rate)
+
+        self.clear_tabs()
+        for rail in rails:
+            self.add_tab(rails[rail])
+
+    def clear_tabs(self):
+        while self.num_tabs > 0:
+            self.remove_tab()
 
     def remove_tab(self):
-        if self.num_rails > 0:
-            self.num_rails -= 1
-            self.rail_count_display.config(text=str(self.num_rails))
-            self.tabs.forget(self.num_rails)
+        if self.num_tabs > 0:
+            self.num_tabs -= 1
+            self.rail_count_display.config(text=str(self.num_tabs))
+            self.tabs.forget(self.num_tabs)
 
     def load_saved_config(self):
-        print("Loading Saved Config")
+        self.init_cfg()
 
-    def save_config(self):
-        messagebox.showinfo("VolMan: COM Port Issue",
-                            "Unable to read selected COM port. Ensure that COM port is correct and not being used by any other applications.")
-        print("Save Config button clicked")
+    def save_cfg(self):
+        com_port = self.com_port_dropdown.get()
+        baud_rate = self.baud_rate_dropdown.get()
+
+        rails = {}
+        for i in range(self.num_tabs):
+            rail_tab = self.tabs.nametowidget(self.tabs.tabs()[i])
+            items = rail_tab.listbox.get(0, tk.END)
+            rails[str(i)] = list(items)
+
+        save_config(com_port, baud_rate, rails)
+        reload_configs_event.set()
+
+        
 
     def save_and_exit(self):
-        self.save_config()
+        self.save_cfg()
         self.destroy()
 
 

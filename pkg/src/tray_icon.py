@@ -7,8 +7,7 @@ import constants
 from config_ui import ConfigWindow
 
 tray_icon_quit_event = Event()
-
-current_root = None
+reload_configs_event = Event()
 
 def on_config():
     config_ui = ConfigWindow()

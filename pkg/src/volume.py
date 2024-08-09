@@ -70,7 +70,7 @@ def match_rails_to_apps(rails:list, apps) -> list:
         curr_apps = apps[str(i)]
         if type(curr_apps) == list:
             for app in curr_apps:
-                if curr_apps not in ["OTHER", "MASTER"]:
+                if app not in ["OTHER", "MASTER"]:
                     app = app.lower()
                 res[app] = percentage
         elif type(curr_apps) == str:
