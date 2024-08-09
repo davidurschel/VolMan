@@ -1,10 +1,12 @@
-from volume import match_rails_to_apps, set_app_volumes, set_system_volume
+import threading
+import time
 import serial
+import pythoncom
+from tkinter import messagebox
+from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 from config_functions import load_config
 from tray_icon import start_tray_icon, tray_icon_quit_event, serial_unavailable_event
 from config_ui import reload_configs_event
-from tkinter import messagebox
-import time
 
 def open_serial(com_port, baud_rate):
     ser = None
@@ -20,11 +22,11 @@ def open_serial(com_port, baud_rate):
     
     return ser
 
-def main():
+def background_process():
+    pythoncom.CoInitialize()  # Initialize COM library for this thread
+
     com_port, baud_rate, applications = load_config()
     ser = open_serial(com_port, baud_rate)
-
-    start_tray_icon()
 
     while not tray_icon_quit_event.is_set():
         if reload_configs_event.is_set():
@@ -58,6 +60,18 @@ def main():
             print('An error occurred:', e)
 
     ser.close()
+    pythoncom.CoUninitialize()  # Uninitialize COM library for this thread when done
+
+def main():
+    # Start the background process in a separate thread
+    processing_thread = threading.Thread(target=background_process)
+    processing_thread.start()
+
+    # Start the tray icon on the main thread
+    start_tray_icon()
+
+    # Wait for the background thread to finish before exiting
+    processing_thread.join()
 
 if __name__ == '__main__':
     main()
