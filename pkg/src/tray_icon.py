@@ -17,9 +17,7 @@ def on_config():
     
     def run_in_thread():
         editing_configs_event.set()
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        exe_path = os.path.join(current_dir, "VolMan_Config_Editor.exe")
-        proc = subprocess.Popen([exe_path])
+        proc = subprocess.Popen("VolMan_Config_Editor.exe")
         proc.wait()
         editing_configs_event.clear()
         reload_configs_event.set()
