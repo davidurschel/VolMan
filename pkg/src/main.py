@@ -7,9 +7,10 @@ from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 from config_functions import load_config
 from tray_icon import start_tray_icon, tray_icon_quit_event, serial_unavailable_event
 from config_ui import reload_configs_event
+import queue
 
 
-def background_process():
+def background_process(alert_queue):
     comtypes.CoInitialize()
 
     def open_serial(com_port, baud_rate, suppress_alert=False):
@@ -21,10 +22,9 @@ def background_process():
             print(e)
             serial_unavailable_event.set()
             if not suppress_alert:
-                messagebox.showerror("VolMan: COM Port Issue",
-                    f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
+                alert_queue.put(("showerror", "VolMan: COM Port Issue",
+                f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor."))
         return ser
-    
     com_port, baud_rate, applications = load_config()
     ser = open_serial(com_port, baud_rate)
 
@@ -65,14 +65,21 @@ def background_process():
 
 def main():
     # Start the background process in a separate thread
-    processing_thread = threading.Thread(target=background_process)
+    alert_queue = queue.Queue()
+    processing_thread = threading.Thread(target=background_process, args=(alert_queue, ))
     processing_thread.start()
 
     # Start the tray icon on the main thread
     start_tray_icon()
 
-    # Wait for the background thread to finish before exiting
-    processing_thread.join()
+    while True:
+        try:
+            message = queue.get(block=False)
+            if message[0] == "showerror":
+                messagebox.showerror(message[1], message[2])
+        except queue.Empty:
+            pass
+
 
 if __name__ == '__main__':
     main()
