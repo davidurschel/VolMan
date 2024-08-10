@@ -3,9 +3,6 @@ from tkinter import ttk
 from tools import get_asset_path
 from constants import ICON_FILE, BAUD_RATES
 from config_functions import load_config, save_config
-from threading import Event
-
-reload_configs_event = Event()
 
 class RailTab(ttk.Frame):
     def __init__(self, parent, rail_id, initial_list=None):
@@ -72,6 +69,8 @@ class RailTab(ttk.Frame):
 class ConfigWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.com_port, self.baud_rate, self.rails = load_config()
+
         self.num_tabs = 0
         self.title("VolMan Configuration")
 
@@ -132,13 +131,12 @@ class ConfigWindow(tk.Tk):
         self.rail_count_display.config(text=str(self.num_tabs))
 
     def init_cfg(self):
-        com_port, baud_rate, rails = load_config()
-        self.com_port_dropdown.set(com_port)
-        self.baud_rate_dropdown.set(baud_rate)
+        self.com_port_dropdown.set(self.com_port)
+        self.baud_rate_dropdown.set(self.baud_rate)
 
         self.clear_tabs()
-        for rail in rails:
-            self.add_tab(rails[rail])
+        for rail in self.rails:
+            self.add_tab(self.rails[rail])
 
     def clear_tabs(self):
         while self.num_tabs > 0:
@@ -151,20 +149,21 @@ class ConfigWindow(tk.Tk):
             self.tabs.forget(self.num_tabs)
 
     def load_saved_config(self):
+        self.com_port, self.baud_rate, self.rails = load_config()
         self.init_cfg()
 
     def save_cfg(self):
-        com_port = self.com_port_dropdown.get()
-        baud_rate = self.baud_rate_dropdown.get()
+        self.com_port = self.com_port_dropdown.get()
+        self.baud_rate = self.baud_rate_dropdown.get()
 
-        rails = {}
+        self.rails = {}
         for i in range(self.num_tabs):
             rail_tab = self.tabs.nametowidget(self.tabs.tabs()[i])
             items = rail_tab.listbox.get(0, tk.END)
-            rails[str(i)] = list(items)
-
-        save_config(com_port, baud_rate, rails)
-        reload_configs_event.set()
+            self.rails[str(i)] = list(items)
+        
+        save_config(self.com_port, self.baud_rate, self.rails)
+        self.destroy()
 
 
 if __name__ == "__main__":

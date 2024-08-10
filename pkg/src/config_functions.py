@@ -8,6 +8,7 @@ def save_config(com_port, baud_rate, rails, config_path='config.cfg'):
     config_dict['RAILS'] = rails
     with open(config_path, 'w') as f:
         json.dump(config_dict, f)
+        f.close()
 
 '''Returns: com_port:str, baud_rate:str, rails:dict'''
 def load_config(config_path='config.cfg') -> tuple:
@@ -17,6 +18,7 @@ def load_config(config_path='config.cfg') -> tuple:
     try:
         with open(config_path, 'r') as f:
             config_dict = json.load(f)
+            f.close()
     except: 
         pass
 
@@ -39,4 +41,4 @@ def load_config(config_path='config.cfg') -> tuple:
                         Add a key value pair to the config file and \
                         try again')
     
-    return com_port, baud_rate, rails
+    return (com_port, baud_rate, rails)

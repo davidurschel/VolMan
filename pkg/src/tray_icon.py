@@ -1,18 +1,35 @@
 import pystray
 from PIL import Image
-from threading import Event
+from threading import Event, Thread
 import webbrowser
+import subprocess
+import os
 from tools import get_asset_path
 import constants
-from config_ui import ConfigWindow
 
 tray_icon_quit_event = Event()
-serial_unavailable_event = Event()
+reload_configs_event = Event()
+editing_configs_event = Event()
 
 def on_config():
-    config_ui = ConfigWindow()
-    config_ui.geometry("600x500")
-    config_ui.mainloop()
+    if editing_configs_event.isSet():
+        return
+    
+    def run_in_thread():
+        editing_configs_event.set()
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        exe_path = os.path.join(current_dir, "VolMan_Config_Editor.exe")
+        proc = subprocess.Popen([exe_path])
+        proc.wait()
+        editing_configs_event.clear()
+        reload_configs_event.set()
+        return
+    
+    thread = Thread(target=run_in_thread)
+    thread.start()
+    
+    
+
 
 def on_help():
     webbrowser.open(constants.HELP_URL)
@@ -23,7 +40,7 @@ def on_exit(icon):
 
 def start_tray_icon():
     menu = pystray.Menu(
-        pystray.MenuItem('Configure', on_config),
+        pystray.MenuItem('Configure', lambda: on_config()),
         pystray.MenuItem('Help', on_help),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem('Exit', on_exit)        
@@ -36,7 +53,6 @@ def start_tray_icon():
     icon.visible = False
 
     icon.run()
-
 
 if __name__ == "__main__":
     start_tray_icon()
