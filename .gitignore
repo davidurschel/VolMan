@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 logs
 
+*.exe
 .venv
 dist
 build
