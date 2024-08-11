@@ -6,6 +6,8 @@ from plyer import notification
 from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 from config_functions import load_config
 from tray_icon import tray_icon_quit_event, reload_configs_event
+from tools import get_asset_path
+from constants import ALERT_ICON_FILE
 
 serial_unavailable_event = Event()
 
@@ -25,7 +27,8 @@ def open_serial(com_port, baud_rate, ser=None, suppress_alert=False):
             if not suppress_alert:
                 notification.notify(
                     title="VolMan: COM Port Issue",
-                    message=f"Unable to open the selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor." 
+                    message=f"Unable to open the selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.", 
+                    app_icon=get_asset_path(ALERT_ICON_FILE)
                 )
         return ser
 

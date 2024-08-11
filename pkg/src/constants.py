@@ -1,4 +1,5 @@
 ICON_FILE = 'icon.ico'
+ALERT_ICON_FILE = 'alert_icon.ico'
 HELP_URL = 'https://github.com/davidurschel/VolMan'
 CONFIG_HELP_URL = 'https://github.com/davidurschel/VolMan'
 CONFIG_FILENAME = "config.cfg"
