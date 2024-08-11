@@ -27,8 +27,9 @@ def open_serial(com_port, baud_rate, ser=None, suppress_alert=False):
             if not suppress_alert:
                 notification.notify(
                     title="VolMan: COM Port Issue",
-                    message=f"Unable to open the selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.", 
-                    app_icon=get_asset_path(ALERT_ICON_FILE)
+                    message=f"Unable to open the selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications.", 
+                    app_icon=get_asset_path(ALERT_ICON_FILE),
+                    timeout=5
                 )
         return ser
 
