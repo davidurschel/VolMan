@@ -3,7 +3,7 @@ int potPins[] = {A0, A1, A2, A3, A4};
 int potCnt;
 
 // Choose the BAUD rate for the serial connection (Recomended: 9600)
-int baudRate = 9600
+int baudRate = 9600;
 
 void setup() {
   Serial.begin(baudRate);
