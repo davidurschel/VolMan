@@ -1,10 +1,8 @@
 import pystray
 from PIL import Image
 from threading import Event, Thread
-import webbrowser
 import subprocess
-import os
-from tools import get_asset_path
+from tools import get_asset_path, open_help_url
 import constants
 
 tray_icon_quit_event = Event()
@@ -30,7 +28,7 @@ def on_config():
 
 
 def on_help():
-    webbrowser.open(constants.HELP_URL)
+    open_help_url()
 
 def on_exit(icon):
     icon.stop()

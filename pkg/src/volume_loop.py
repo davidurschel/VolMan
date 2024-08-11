@@ -2,10 +2,11 @@ import time
 import comtypes
 import serial
 from threading import Event
-from tkinter import messagebox
+from win11toast import toast
 from volume import match_rails_to_apps, set_app_volumes, set_system_volume
 from config_functions import load_config
 from tray_icon import tray_icon_quit_event, reload_configs_event
+from tools import open_help_url
 
 serial_unavailable_event = Event()
 
@@ -22,9 +23,10 @@ def open_serial(com_port, baud_rate, ser=None, suppress_alert=False):
         except Exception as e:
             print(e)
             serial_unavailable_event.set()
-            # if not suppress_alert:
-            #     messagebox.showerror("VolMan: COM Port Issue",
-            #         f"Unable to read selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.")
+            if not suppress_alert:
+                toast("VolMan: COM Port Issue",
+                  f"Unable to open the selected COM port. Ensure that {com_port} is correct. Also ensure that {com_port} port is not being used by any other applications. Look in the system tray for the configuration editor.",
+                  on_click=lambda _: open_help_url())
         return ser
 
 def volume_loop():
