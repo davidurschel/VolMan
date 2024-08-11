@@ -1,14 +1,9 @@
 // Fill with the numbers for all the pins that read a potentiometer
 int potPins[] = {A0, A1, A2, A3, A4};
-
-// Choose the BAUD rate for the serial connection
-int baudRate = 9600
-
 int potCnt;
 
-// Fill with numbers for all the pins that read a button
-int butPins[] = {};
-int butCnt;
+// Choose the BAUD rate for the serial connection (Recomended: 9600)
+int baudRate = 9600
 
 void setup() {
   Serial.begin(baudRate);
