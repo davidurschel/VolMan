@@ -1,19 +1,17 @@
 // Fill with the numbers for all the pins that read a potentiometer
-int potPins[] = {A0, A1, A2, A3};
+int potPins[] = {A0, A1, A2, A3, A4};
 int potCnt;
 
-// Fill with numbers for all the pins that read a button
-int butPins[] = {};
-int butCnt;
+// Choose the BAUD rate for the serial connection (Recomended: 9600)
+int baudRate = 9600;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(baudRate);
   potCnt = sizeof(potPins)/sizeof(potPins[0]);
 }
 
 void loop() {
   if (sizeof(potPins) > 0){
-    
     for(int i = 0; i < potCnt; i++){
       float sensorValue = (float)analogRead(potPins[i]);
       float out = sensorValue/1023.0;
