@@ -68,3 +68,6 @@ def volume_loop():
 
     ser.close()
     comtypes.CoUninitialize()
+
+if __name__ == "__main__":
+    volume_loop()

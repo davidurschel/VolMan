@@ -1,22 +1,14 @@
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume, ISimpleAudioVolume
-import numpy as np
 
-
-def percentage_to_db(percentage:float, minV:float=-60.0, maxV:float=0.0) -> float:
-    percentage=max(min(percentage, 100.0), 0.0)
-    if percentage == 0.0:
-        return minV
-    res = np.log((percentage/100+0.0196871)/(1.01969))/0.0657881
-    return max(min(res, maxV), minV)
 
 
 def set_system_volume(percentage:float):
     devices = AudioUtilities.GetSpeakers()
     interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
     volume = cast(interface, POINTER(IAudioEndpointVolume))
-    volume.SetMasterVolumeLevel(percentage_to_db(percentage), None)
+    volume.SetMasterVolumeLevelScalar(percentage/100, None)
     return
 
 
