@@ -1,6 +1,9 @@
 # VolMan
 VolMan gives a hardware interface to allow users to control the volume on their windows device using physical controls, offering a more intuitive and responsive method than the on-screen alternative. This is done by leveraging an arduino microcontroller and physical slider or knob potentiometers as well as a native windows application written in python. The arduino reads the resistances of the potentiometers and passes these to your windows device via serial connection where they are read and the system or application volume is changed in real time. VolMan also allows for users to update the configuration in real time using the system tray icon provided. This project includes the circuit layout, 3D models for a case, Arduino code, and a windows exectuable with setup instructions below.
 
+![20250303_011816](https://github.com/user-attachments/assets/a170153c-0987-44c4-9347-4e40bc492ea3)
+
+
 ## Setup
 ### Physical Setup
 #### Breadboard
@@ -14,7 +17,7 @@ This is the circuit Layout for a design using an Arduino nano and 5 sliding 75mm
 ![image](https://github.com/user-attachments/assets/e02fd8b8-3e23-4ab4-b99d-06a012418484)
 
 #### 5 Rail With 3D Models
-Still testing... will update with instructions once known to be working
+Simply print the STL files contained in the [pcb_models](https://github.com/davidurschel/VolMan/tree/main/pcb_models) folder
 
 ### Arduino Setup
 To setup the arduino to be connected to a serial COM port you can flash it with the [Default Script](https://github.com/davidurschel/VolMan/blob/main/arduino/main/main.ino)
